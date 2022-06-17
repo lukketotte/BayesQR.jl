@@ -1,0 +1,13 @@
+name = "BayesQR"
+uuid = "56593891-ecd2-4259-a1a0-2763cfab97d6"
+authors = ["lukketotte <lukas.arnroth@gmail.com> and contributors"]
+version = "0.1.0"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
