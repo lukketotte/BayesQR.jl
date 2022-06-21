@@ -73,9 +73,9 @@ function sampleC(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, β::Abstr
     for i ∈ 1:n
         probs = zeros(k)
         for j ∈ 1:k
-            #μ = z[i] - b[j]
-            #probs[j] = w[j] / √ξ₂[j] * exp(-(μ - ξ₁[j]*v[i])^2*τ / (2*ξ₂[j] * v[i]))
-            probs[j] = (z[i] - b[j] - ξ₁[j]*v[i])^2*τ / (2*ξ₂[j] * v[i])
+            μ = z[i] - b[j]
+            probs[j] = w[j] / √ξ₂[j] * exp(-(μ - ξ₁[j]*v[i])^2*τ / (2*ξ₂[j] * v[i]))
+            #probs[j] = (z[i] - b[j] - ξ₁[j]*v[i])^2*τ / (2*ξ₂[j] * v[i])
         end
         probs = (w ./ sqrt.(ξ₂)) .* exp.(.-(probs .+ mean(probs)))
 
@@ -116,7 +116,7 @@ function bcqr(f::FormulaTerm, df::DataFrame, τ::AbstractVector{<:Real}, niter::
         β[i,:] = sampleβ(y, X, v, C[:,:,i-1], b[i-1,:], τ, σ)
         b[i,:] = sampleb(y, X, β[i,:], v, C[:,:,i-1], τ, σ)
         w = sampleW(C[:,:,i-1], [0.1 for i ∈ 1:length(τ)])
-        C[:,:,i] = sampleC(y, X, β[i,:], v, b[i,:], w, τ, σ)
+        C[:,:,i] = try sampleC(y, X, β[i,:], v, b[i,:], w, τ, σ) catch e C[:,:,i-1]
     end
 
     if probs
