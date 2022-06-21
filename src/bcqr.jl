@@ -77,7 +77,7 @@ function sampleC(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, β::Abstr
             #probs[j] = w[j] / √ξ₂[j] * exp(-(μ - ξ₁[j]*v[i])^2*τ / (2*ξ₂[j] * v[i]))
             probs[j] = (z[i] - b[j] - ξ₁[j]*v[i])^2*τ / (2*ξ₂[j] * v[i])
         end
-        probs = (w ./ sqrt.(ξ₂)) .* exp.(.-(probs .- minimum(probs)))
+        probs = (w ./ sqrt.(ξ₂)) .* exp.(.-(probs .- mean(probs)))
 
         retC[:,i] = rand(Multinomial(1, probs./sum(probs)))
     end
@@ -116,7 +116,7 @@ function bcqr(f::FormulaTerm, df::DataFrame, τ::AbstractVector{<:Real}, niter::
         β[i,:] = sampleβ(y, X, v, C[:,:,i-1], b[i-1,:], τ, σ)
         b[i,:] = sampleb(y, X, β[i,:], v, C[:,:,i-1], τ, σ)
         w = sampleW(C[:,:,i-1], [0.1 for i ∈ 1:length(τ)])
-        C[:,:,i] = try sampleC(y, X, β[i,:], v, b[i,:], w, τ, σ) catch e C[:,:,i-1] end
+        C[:,:,i] = sampleC(y, X, β[i,:], v, b[i,:], w, τ, σ)
     end
 
     if probs
