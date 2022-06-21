@@ -77,7 +77,7 @@ function sampleC(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, β::Abstr
             #probs[j] = w[j] / √ξ₂[j] * exp(-(μ - ξ₁[j]*v[i])^2*τ / (2*ξ₂[j] * v[i]))
             probs[j] = (z[i] - b[j] - ξ₁[j]*v[i])^2*τ / (2*ξ₂[j] * v[i])
         end
-        probs = (w ./ sqrt.(ξ₂)) .* exp.(.-(probs .- maximum(probs)))
+        probs = (w ./ sqrt.(ξ₂)) .* exp.(.-(probs .- minimum(probs)))
 
         retC[:,i] = rand(Multinomial(1, probs./sum(probs)))
     end
