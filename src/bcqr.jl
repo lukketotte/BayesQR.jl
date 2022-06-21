@@ -111,12 +111,12 @@ function bcqr(f::FormulaTerm, df::DataFrame, τ::AbstractVector{<:Real}, niter::
     v = ones(n)
 
     for i ∈ 2:niter
-        σ = sampleτ(y, X, v, β[i-1,:], C[:,:,i-1], b[i-1,:], τ, 1, 1)
-        v = samplev(y, X, β[i-1,:], C[:,:,i-1], b[i-1,:], τ, σ)
-        β[i,:] = sampleβ(y, X, v, C[:,:,i-1], b[i-1,:], τ, σ)
-        b[i,:] = sampleb(y, X, β[i,:], v, C[:,:,i-1], τ, σ)
         w = sampleW(C[:,:,i-1], [0.1 for i ∈ 1:length(τ)])
-        C[:,:,i] = try sampleC(y, X, β[i,:], v, b[i,:], w, τ, σ) catch e C[:,:,i-1] end
+        C[:,:,i] = sampleC(y, X, β[i-1,:], v, b[i-1,:], w, τ, σ) catch e C[:,:,i-1]
+        σ = sampleτ(y, X, v, β[i-1,:], C[:,:,i], b[i-1,:], τ, 1, 1)
+        v = samplev(y, X, β[i-1,:], C[:,:,i], b[i-1,:], τ, σ)
+        β[i,:] = sampleβ(y, X, v, C[:,:,i], b[i-1,:], τ, σ)
+        b[i,:] = sampleb(y, X, β[i,:], v, C[:,:,i], τ, σ)
     end
 
     if probs
