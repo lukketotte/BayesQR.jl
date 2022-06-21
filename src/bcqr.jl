@@ -116,7 +116,7 @@ function bcqr(f::FormulaTerm, df::DataFrame, τ::AbstractVector{<:Real}, niter::
         β[i,:] = sampleβ(y, X, v, C[:,:,i-1], b[i-1,:], τ, σ)
         b[i,:] = sampleb(y, X, β[i,:], v, C[:,:,i-1], τ, σ)
         w = sampleW(C[:,:,i-1], [0.1 for i ∈ 1:length(τ)])
-        C[:,:,i] = sampleC(y, X, β[i,:], v, b[i,:], w, τ, σ)
+        C[:,:,i] = try sampleC(y, X, β[i,:], v, b[i,:], w, τ, σ) catch e C[:,:,i-1]
     end
 
     if probs
