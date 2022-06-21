@@ -73,9 +73,12 @@ function sampleC(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, β::Abstr
     for i ∈ 1:n
         probs = zeros(k)
         for j ∈ 1:k
-            μ = z[i] - b[j]
-            probs[j] = w[j] / √ξ₂[j] * exp(-(μ - ξ₁[j]*v[i])^2*τ / (2*ξ₂[j] * v[i]))
+            #μ = z[i] - b[j]
+            #probs[j] = w[j] / √ξ₂[j] * exp(-(μ - ξ₁[j]*v[i])^2*τ / (2*ξ₂[j] * v[i]))
+            probs[j] = (z[i] - b[j] - ξ₁[j]*v[i])^2*τ / (2*ξ₂[j] * v[i])
         end
+        probs = (w ./ sqrt.(ξ₂)) .* exp.(.-(probs .- maximum(probs)))
+
         retC[:,i] = rand(Multinomial(1, probs./sum(probs)))
     end
     retC
