@@ -25,7 +25,7 @@ function samplev(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, β::Abstr
 end
 
 function sampleβ(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, v::AbstractVector{<:Real},
-    C::AbstractMatrix{<:Real}, b::AbstractVector{<:Real}, θ::AbstractVector{<:Real}, τ::Real)
+    C::AbstractMatrix{<:Real}, b::AbstractVector{<:Real}, θ::AbstractVector{<:Real}, τ::Real, σβ::Real = 1.)
     n,p = size(X)
     k = length(b)
     retβ = zeros(p)
@@ -38,7 +38,8 @@ function sampleβ(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, v::Abstr
             Σ += τ/(ξ₂[j]*v[i]) * C[j,i] *(X[i,:] * X[i,:]')
         end
     end
-    Σ = Symmetric((Σ + I/10)^(-1))
+    η = rand(Exponential(2/(1/σβ)^2), p)
+    Σ = Symmetric((Σ + diagm(η))^(-1))
     rand(MvNormal(Σ*μ, Σ))
 end
 
@@ -84,7 +85,8 @@ function sampleC(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, β::Abstr
     retC
 end
 
-function bcqr(f::FormulaTerm, df::DataFrame, τ::AbstractVector{<:Real}, niter::Int, burn::Int, probs::Bool = true; kwargs...)
+function bcqr(f::FormulaTerm, df::DataFrame, τ::AbstractVector{<:Real}, niter::Int, burn::Int,
+    probs::Bool = true, σβ::Real = 1.; kwargs...)
     allunique(τ) && all(τ .> 0) && all(τ .< 1) || throw(ArgumentError("all elements of τ must be on (0,1) and unique"))
     niter > burn || throw(ArgumentError("niter must be larger than burn"))
 
@@ -127,7 +129,7 @@ function bcqr(f::FormulaTerm, df::DataFrame, τ::AbstractVector{<:Real}, niter::
 end
 
 function bcqr(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, τ::AbstractVector{<:Real}, niter::Int,
-    burn::Int, probs::Bool = true; kwargs...)
+    burn::Int, probs::Bool = true, σβ::Real = 1.; kwargs...)
     allunique(τ) && all(τ .> 0) && all(τ .< 1) || throw(ArgumentError("all elements of τ must be on (0,1) and unique"))
     niter > burn || throw(ArgumentError("niter must be larger than burn"))
     n,p = size(X)
