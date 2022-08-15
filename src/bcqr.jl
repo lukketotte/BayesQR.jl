@@ -52,9 +52,9 @@ function sampleb(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, β::Abstr
         if sum(C[i,:]) > 0
             μ = sum((C[i,:] .* ((y - X*β) - (ξ₁[i].* v)) ) ./ (ξ₂[i] .* v))
             σ = sum(C[i,:] ./ (ξ₂[i] .* v))
-            retb[i] = rand(Normal(μ/σ, √(1/(τ*σ))))
+            retb[i] = rand(Normal(μ/σ, 1/(τ*σ)))
         else
-            retb[i] = rand(Normal(0, √(1/τ)))
+            retb[i] = rand(Normal(0, 1/τ))
         end
     end
     retb
