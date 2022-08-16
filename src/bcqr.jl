@@ -15,8 +15,8 @@ function samplev(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, β::Abstr
     C::AbstractMatrix{<:Real}, b::AbstractVector{<:Real}, θ::AbstractVector{<:Real}, τ::Real)
     k,n = size(C)
     retV = zeros(n)
+    ξ₁, ξ₂ = (1 .- 2 .* θ)./(θ.*(1 .-θ)), sqrt.(2 ./(θ .* (1 .-θ)))
     for i ∈ 1:n
-        ξ₁, ξ₂ = (1 .- 2 .* θ)./(θ.*(1 .-θ)), sqrt.(2 ./(θ .* (1 .-θ)))
         λ = C[:,i] ⋅ (ξ₁.^2 ./ ξ₂.^2)
         μ = (C[:,i] ⋅ ((ξ₁.^2 + 2*ξ₂.^2) ./ (y[i] .- b .- X[i,:]⋅β).^2))
         retV[i] = 1/rInvGauss(√μ, (λ + 2)*τ)
@@ -122,7 +122,7 @@ function bcqr(f::FormulaTerm, df::DataFrame, τ::AbstractVector{<:Real}, niter::
     end
 
     if probs
-        (Chains(β[burn:niter,:], ["β"*string(i) for i in 1:p]), vec(mean(C[:,:,:], dims = [2,3])))
+        (Chains(β[burn:niter,:], ["β"*string(i) for i in 1:p]), vec(mean(C[:,:,:], dims = [2,3])), b)
     else
         Chains(β[burn:niter,:], ["β"*string(i) for i in 1:p])
     end
@@ -161,7 +161,7 @@ function bcqr(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, τ::Abstract
     end
 
     if probs
-        (Chains(β[burn:niter,:], ["β"*string(i) for i in 1:p]), vec(mean(C[:,:,:], dims = [2,3])))
+        (Chains(β[burn:niter,:], ["β"*string(i) for i in 1:p]), vec(mean(C[:,:,:], dims = [2,3])), b)
     else
         Chains(β[burn:niter,:], ["β"*string(i) for i in 1:p])
     end
