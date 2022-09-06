@@ -4,8 +4,10 @@ function rInvGauss(μ::Real, λ::Real)
     rand(Uniform()) < μ/(μ + f) ? f : μ^2/f
 end
 
-function sampleβ(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, v::AbstractVector{<:Real}, σ::Real, θ::Real, ω::Real)
-    Σ = ((broadcast(/, X, sqrt.(v.*σ.*ω)) |> x -> x'x) + I / 10)^(-1)
+function sampleβ(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, v::AbstractVector{<:Real},
+    σ::Real, θ::Real, ω::Real, σᵦ::Real, prior::String)
+    Σᵦ = lowercase(prior) === "normal" ? I / σᵦ : diagm(rand(Exponential((1/σᵦ)^2/2), size(X, 2)))
+    Σ = ((broadcast(/, X, sqrt.(v.*σ.*ω)) |> x -> x'x) + Σᵦ)^(-1)
     μ = Σ*(X'*((y .- θ.*v) ./ (ω*σ.*v)))
     rand(MvNormal(μ, Symmetric(Σ)))
 end
@@ -27,9 +29,16 @@ function sampleσ(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, β::Abst
     rand(InverseGamma(shape, scale))
 end
 
-function bqr(f::FormulaTerm, df::DataFrame, τ::Real, niter::Int, burn::Int; kwargs...)
+"""
+    bqr(f, df, τ, niter, burn)
+
+Runs the Bayesian quantile regression with dependent variable y and covariates X
+"""
+function bqr(f::FormulaTerm, df::DataFrame, τ::Real, niter::Int, burn::Int, σᵦ::Real = 10., prior::String = "Normal"; kwargs...)
     τ > 0 && τ < 1 || throw(DomainError(τ,"τ must be on (0,1)"))
     niter > burn || throw(ArgumentError("niter must be larger than burn"))
+    lowercase(prior) === "normal" || lowercase(prior) === "laplace" || throw(ArgumentError("prior must be either normal or laplace"))
+    σᵦ > 0 || throw(DomainError(σᵦ, "σᵦ must be positive"))
     mf = ModelFrame(f, df)
     y = response(mf)::Vector{Float64}
     X = modelmatrix(mf)::Matrix{Float64}
@@ -49,16 +58,23 @@ function bqr(f::FormulaTerm, df::DataFrame, τ::Real, niter::Int, burn::Int; kwa
 
     for i ∈ 2:niter
         v = sampleV(y, X, β[i-1,:], θ, ω, σ)
-        β[i,:] = sampleβ(y, X, v, σ, θ, ω)
+        β[i,:] = sampleβ(y, X, v, σ, θ, ω, σᵦ, prior)
         σ = sampleσ(y, X, β[i,:], v, θ, ω)
     end
 
     Chains(β[burn:end,:], ["β"*string(i) for i in 1:p])
 end
 
-function bqr(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, τ::Real, niter::Int, burn::Int; kwargs...)
+"""
+    bqr(y, X, τ, niter, burn)
+
+Runs the Bayesian quantile regression with dependent variable y and covariates X
+"""
+function bqr(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, τ::Real, niter::Int, burn::Int, σᵦ::Real = 10., prior::String = "Normal"; kwargs...)
     τ > 0 && τ < 1 || throw(DomainError(τ,"τ must be on (0,1)"))
     niter > burn || throw(ArgumentError("niter must be larger than burn"))
+    lowercase(prior) === "normal" || lowercase(prior) === "laplace" || throw(ArgumentError("prior must be either normal or laplace"))
+    σᵦ > 0 || throw(DomainError(σᵦ, "σᵦ must be positive"))
     n,p = size(X)
     n == length(y) || throw(DimensionMismatch("Mismatching dimensions of y and X"))
     θ, ω = (1-2*τ)/(τ*(1-τ)), 2/(τ*(1-τ))
@@ -76,7 +92,7 @@ function bqr(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, τ::Real, nit
 
     for i ∈ 2:niter
         v = sampleV(y, X, β[i-1,:], θ, ω, σ)
-        β[i,:] = sampleβ(y, X, v, σ, θ, ω)
+        β[i,:] = sampleβ(y, X, v, σ, θ, ω, σᵦ, prior)
         σ = sampleσ(y, X, β[i,:], v, θ, ω)
     end
 

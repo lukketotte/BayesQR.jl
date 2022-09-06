@@ -18,4 +18,7 @@ using Distributions, DataFrames, StatsModels, LinearAlgebra, MCMCChains
     @test_throws ArgumentError bqr(f, df, 0.1, 1, 10)
     @test_throws ArgumentError bqr(y, X, 0.1, 1, 10)
     @test typeof(bqr(f, df, 0.5, 10, 1)) <: Chains
+
+    @test_throws DomainError bqr(f, df, 0.1, 100, 1, -1, "laplace")
+    @test_throws ArgumentError bqr(y, X, 0.1, 1, 10, 10, "beta")
 end
