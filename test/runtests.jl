@@ -18,15 +18,4 @@ using Distributions, DataFrames, StatsModels, LinearAlgebra, MCMCChains
     @test_throws ArgumentError bqr(f, df, 0.1, 1, 10)
     @test_throws ArgumentError bqr(y, X, 0.1, 1, 10)
     @test typeof(bqr(f, df, 0.5, 10, 1)) <: Chains
-
-    τ =  [0.1, 0.25, 0.5, 0.75, 0.9]
-
-    @test_throws ArgumentError bcqr(f1, df, τ, 100, 1)
-    @test_throws ArgumentError bcqr(f, df, [0.1, 0.1], 100, 1)
-    @test_throws ArgumentError bcqr(f, df, [-0.1, 0.25, 0.5], 100, 1)
-    @test_throws ArgumentError bcqr(y, X, [0.1, 0.1], 100, 1)
-    @test_throws ArgumentError bcqr(y, X, [-0.1, 0.25, 0.5], 100, 1)
-    @test typeof(bcqr(f, df, τ, 10, 1)) <: Tuple{<:Chains, <:AbstractVector}
-    @test typeof(bcqr(f, df, τ, 10, 1, false)) <: Chains
-    @test_throws DimensionMismatch bcqr(y, X[1:(n-2),:], τ, 100, 1)
 end
