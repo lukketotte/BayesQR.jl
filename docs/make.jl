@@ -1,7 +1,6 @@
 push!(LOAD_PATH, "../src/")
 
-using Documenter
-using BayesQR
+using Documenter, BayesQR
 
 makedocs(
     sitename = "BayesQR.jl",
@@ -10,4 +9,4 @@ makedocs(
     "Home" => "index.md"
     ])
 
-deploydocs(;repo="github.com/lukketotte/BayesQr.jl")
+deploydocs(;repo="github.com/lukketotte/BayesQR.jl")

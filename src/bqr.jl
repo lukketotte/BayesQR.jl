@@ -30,7 +30,8 @@ function sampleσ(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, β::Abst
 end
 
 """
-    bqr(f, df, τ, niter, burn)
+    bqr(f::FormulaTerm, df::DataFrame, τ::Real, niter::Int, burn::Int)
+    bqr(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, τ::Real, niter::Int, burn::Int)
 
 Runs the Bayesian quantile regression with dependent variable y and covariates X
 """
@@ -64,12 +65,6 @@ function bqr(f::FormulaTerm, df::DataFrame, τ::Real, niter::Int, burn::Int, σ�
 
     Chains(β[burn:end,:], ["β"*string(i) for i in 1:p])
 end
-
-"""
-    bqr(y, X, τ, niter, burn)
-
-Runs the Bayesian quantile regression with dependent variable y and covariates X
-"""
 function bqr(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, τ::Real, niter::Int, burn::Int, σᵦ::Real = 10., prior::String = "Normal"; kwargs...)
     τ > 0 && τ < 1 || throw(DomainError(τ,"τ must be on (0,1)"))
     niter > burn || throw(ArgumentError("niter must be larger than burn"))
