@@ -30,20 +30,22 @@ function sampleσ(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, β::Abst
 end
 
 """
-    bqr(f::FormulaTerm, df::DataFrame, τ::Real, niter::Int, burn::Int)
     bqr(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, τ::Real, niter::Int, burn::Int)
 
-Runs the Bayesian quantile regression with dependent variable y and covariates X
+Runs the Bayesian quantile regression with dependent variable `y` and covariates `X` for quantile `τ`.
+Priors currently implemented are the Normal and Laplace.
+
+# Arguments
+- `σᵦ::Real`: variance of π(β)
+- `prior::String` : "Normal" or "Laplace"
 """
-function bqr(f::FormulaTerm, df::DataFrame, τ::Real, niter::Int, burn::Int, σᵦ::Real = 10., prior::String = "Normal"; kwargs...)
+function bqr(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, τ::Real, niter::Int, burn::Int, σᵦ::Real = 10., prior::String = "Normal"; kwargs...)
     τ > 0 && τ < 1 || throw(DomainError(τ,"τ must be on (0,1)"))
     niter > burn || throw(ArgumentError("niter must be larger than burn"))
     lowercase(prior) === "normal" || lowercase(prior) === "laplace" || throw(ArgumentError("prior must be either normal or laplace"))
     σᵦ > 0 || throw(DomainError(σᵦ, "σᵦ must be positive"))
-    mf = ModelFrame(f, df)
-    y = response(mf)::Vector{Float64}
-    X = modelmatrix(mf)::Matrix{Float64}
     n,p = size(X)
+    n == length(y) || throw(DimensionMismatch("Mismatching dimensions of y and X"))
     θ, ω = (1-2*τ)/(τ*(1-τ)), 2/(τ*(1-τ))
     β = zeros((niter, p))
     kwargs = Dict(kwargs)
@@ -65,13 +67,23 @@ function bqr(f::FormulaTerm, df::DataFrame, τ::Real, niter::Int, burn::Int, σ�
 
     Chains(β[burn:end,:], ["β"*string(i) for i in 1:p])
 end
-function bqr(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, τ::Real, niter::Int, burn::Int, σᵦ::Real = 10., prior::String = "Normal"; kwargs...)
+
+"""
+    bqr(f::FormulaTerm, df::DataFrame, τ::Real, niter::Int, burn::Int)
+
+Runs the Bayesian quantile regression with dependent variable y and covariates X
+constructed from `f` and `df`. 
+"""
+function bqr(f::FormulaTerm, df::DataFrame, τ::Real, niter::Int, burn::Int, σᵦ::Real = 10., prior::String = "Normal"; kwargs...)
     τ > 0 && τ < 1 || throw(DomainError(τ,"τ must be on (0,1)"))
     niter > burn || throw(ArgumentError("niter must be larger than burn"))
     lowercase(prior) === "normal" || lowercase(prior) === "laplace" || throw(ArgumentError("prior must be either normal or laplace"))
     σᵦ > 0 || throw(DomainError(σᵦ, "σᵦ must be positive"))
+    completecases!(df)
+    mf = ModelFrame(f, df)
+    y = response(mf)::Vector{Float64}
+    X = modelmatrix(mf)::Matrix{Float64}
     n,p = size(X)
-    n == length(y) || throw(DimensionMismatch("Mismatching dimensions of y and X"))
     θ, ω = (1-2*τ)/(τ*(1-τ)), 2/(τ*(1-τ))
     β = zeros((niter, p))
     kwargs = Dict(kwargs)
