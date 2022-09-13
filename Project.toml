@@ -15,6 +15,11 @@ StatsModels = "3eaba693-59b7-5ba5-a881-562e759f1c8d"
 
 [compat]
 MCMCChains = "5"
+Distributions = "0.25"
+SpecialFunctions = "2"
+StatsModels = "0.6"
+StatsBase = "0.33"
+DataFrames = "1"
 julia = "1"
 
 [extras]
