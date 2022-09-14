@@ -4,7 +4,7 @@
 # Bayesian Quantile Regression (BQR)
 Implementation of BQR
 
-* Install using `]add "https://github.com/lukketotte/BayesQR.jl"`
+* Install using `]add BayesQR`
 * Main author: Lukas Arnroth
 * Contact: Use the [https://github.com/lukketotte/BayesQR.jl/issues](issues) page
 * Documentation: [https://lukketotte.github.io/BayesQR.jl/dev/](Documentation)
