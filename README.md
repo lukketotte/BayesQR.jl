@@ -7,4 +7,4 @@ Implementation of BQR
 * Install using `]add "https://github.com/lukketotte/BayesQR.jl"`
 * Main author: Lukas Arnroth
 * Contact: Use the [https://github.com/lukketotte/BayesQR.jl/issues](issues) page
-* [https://lukketotte.github.io/BayesQR.jl/dev/](Documentation)
+* Documentation: [https://lukketotte.github.io/BayesQR.jl/dev/](Documentation)
