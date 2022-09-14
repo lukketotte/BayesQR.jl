@@ -79,6 +79,7 @@ function bqr(f::FormulaTerm, df::DataFrame, τ::Real, niter::Int, burn::Int, σ�
     niter > burn || throw(ArgumentError("niter must be larger than burn"))
     lowercase(prior) === "normal" || lowercase(prior) === "laplace" || throw(ArgumentError("prior must be either normal or laplace"))
     σᵦ > 0 || throw(DomainError(σᵦ, "σᵦ must be positive"))
+    dropmissing!(df)
     mf = ModelFrame(f, df)
     y = response(mf)::Vector{Float64}
     X = modelmatrix(mf)::Matrix{Float64}
