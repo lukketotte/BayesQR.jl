@@ -39,8 +39,8 @@ Priors currently implemented are the Normal and Laplace.
 - `σᵦ::Real`: variance of π(β)
 - `prior::String` : "Normal" or "Laplace"
 """
-function bqr(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, τ::Real, niter::Int, burn::Int, σᵦ::Real = 10., prior::String = "Normal"; kwargs...)
-    τ > 0 && τ < 1 || throw(DomainError(τ,"τ must be on (0,1)"))
+function bqr(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, τ::Real, niter::Int, burn::Int = 0, σᵦ::Real = 10., prior::String = "Normal"; kwargs...)
+    τ > 0 && τ < 1 || throw(DomainError(τ,"τ must be in (0,1)"))
     niter > burn || throw(ArgumentError("niter must be larger than burn"))
     lowercase(prior) === "normal" || lowercase(prior) === "laplace" || throw(ArgumentError("prior must be either normal or laplace"))
     σᵦ > 0 || throw(DomainError(σᵦ, "σᵦ must be positive"))
@@ -65,7 +65,7 @@ function bqr(y::AbstractVector{<:Real}, X::AbstractMatrix{<:Real}, τ::Real, nit
         σ = sampleσ(y, X, β[i,:], v, θ, ω)
     end
 
-    Chains(β[burn:end,:], ["β"*string(i) for i in 1:p])
+    Chains(β[(burn + 1):end,:], ["β"*string(i) for i in 1:p])
 end
 
 """
@@ -102,5 +102,5 @@ function bqr(f::FormulaTerm, df::DataFrame, τ::Real, niter::Int, burn::Int, σ�
         σ = sampleσ(y, X, β[i,:], v, θ, ω)
     end
 
-    Chains(β[burn:end,:], ["β"*string(i) for i in 1:p])
+    Chains(β[(burn + 1):end,:], ["β"*string(i) for i in 1:p])
 end

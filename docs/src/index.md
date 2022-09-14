@@ -23,6 +23,3 @@ to columns in `data`.
 - `y` a vector holding values of the dependent variable
 
 Both method returns a [MCMCChains.jl `Chains` object](https://beta.turing.ml/MCMCChains.jl/dev/chains/)
-
-
-## Examples
